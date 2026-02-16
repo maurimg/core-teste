@@ -2,7 +2,6 @@ FROM php:8.2-cli
 
 WORKDIR /app
 
-# Instalar dependências do sistema
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -11,16 +10,12 @@ RUN apt-get update && apt-get install -y \
     curl \
     && docker-php-ext-install zip
 
-# Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copiar projeto
 COPY . .
 
-# Instalar dependências do Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Gerar chave
 RUN php artisan key:generate --force
 
 EXPOSE 10000
