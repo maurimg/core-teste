@@ -14,8 +14,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+# Criar .env mínimo manualmente
+RUN echo "APP_NAME=Laravel" > .env
+RUN echo "APP_ENV=production" >> .env
+RUN echo "APP_KEY=" >> .env
+RUN echo "APP_DEBUG=false" >> .env
+RUN echo "APP_URL=http://localhost" >> .env
 
+# Instalar dependências SEM scripts
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Gerar chave
 RUN php artisan key:generate --force
 
 EXPOSE 10000
