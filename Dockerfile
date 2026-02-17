@@ -1,31 +1,34 @@
 FROM php:8.2-cli
 
-WORKDIR /app
-
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
+    curl \
     libzip-dev \
     zip \
-    curl \
-    && docker-php-ext-install zip
+    libonig-dev \
+    && docker-php-ext-install \
+        zip \
+        mbstring \
+        bcmath \
+        pdo \
+        pdo_mysql
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+WORKDIR /var/www
+
 COPY . .
 
-# Criar .env mínimo manualmente
-RUN echo "APP_NAME=Laravel" > .env
-RUN echo "APP_ENV=production" >> .env
-RUN echo "APP_KEY=" >> .env
-RUN echo "APP_DEBUG=false" >> .env
-RUN echo "APP_URL=http://localhost" >> .env
+RUN composer install --no-dev --optimize-autoloader
 
-# Instalar dependências SEM scripts
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# Limpar qualquer cache quebrado do Laravel
+RUN php artisan config:clear
+RUN php artisan route:clear
+RUN php artisan cache:clear
+RUN php artisan view:clear
 
-# Gerar chave
-RUN php artisan key:generate --force
+RUN chmod -R 775 storage bootstrap/cache
 
 EXPOSE 10000
 
