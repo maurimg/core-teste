@@ -20,13 +20,12 @@ WORKDIR /var/www
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Limpar qualquer cache quebrado do Laravel
-RUN php artisan config:clear
-RUN php artisan route:clear
-RUN php artisan cache:clear
-RUN php artisan view:clear
+RUN php artisan config:clear || true
+RUN php artisan route:clear || true
+RUN php artisan cache:clear || true
+RUN php artisan view:clear || true
 
 RUN chmod -R 775 storage bootstrap/cache
 
